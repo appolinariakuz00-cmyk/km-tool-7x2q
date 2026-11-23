@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Дубль кода для этикеток</title>
+<style>
+:root{--bg:#f6f6f4;--card:#fff;--tx:#1c1c1a;--mut:#6b6b66;--ac:#2a6df4;--bd:#dcdcd6;--ok:#1a8a4a;--wr:#b25e00;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#161615;--card:#222221;--tx:#ececE8;--mut:#9a9a94;--bd:#3a3a37;--ac:#6b9bff;--ok:#4cc27c;--wr:#e6a04a}}
+:root[data-theme="dark"]{--bg:#161615;--card:#222221;--tx:#ececE8;--mut:#9a9a94;--bd:#3a3a37;--ac:#6b9bff;--ok:#4cc27c;--wr:#e6a04a}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:760px;margin:0 auto;padding:16px}
+h1{font-size:22px;margin:4px 0 14px}h2{font-size:15px;margin:0 0 10px;color:var(--mut);font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:14px}
+button,input,select,textarea{font:inherit;color:var(--tx)}
+button{background:var(--ac);color:#fff;border:0;border-radius:10px;padding:10px 14px;cursor:pointer}
+button.g{background:transparent;color:var(--tx);border:1px solid var(--bd)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,textarea{background:var(--bg);border:1px solid var(--bd);border-radius:10px;padding:9px 10px}
+textarea{width:100%;min-height:70px;font-family:ui-monospace,Menlo,monospace;font-size:13px}
+video{width:100%;max-height:300px;background:#000;border-radius:10px;display:none}
+.msg{font-size:14px;color:var(--mut);margin-top:8px}.ok{color:var(--ok)}.wr{color:var(--wr)}
+.hist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.hi{display:flex;justify-content:space-between;gap:8px;padding:8px 10px;border:1px solid var(--bd);border-radius:10px;cursor:pointer;font-size:13px;font-family:ui-monospace,Menlo,monospace;overflow:hidden}
+.hi.on{border-color:var(--ac)}.hi span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#preview{display:flex;justify-content:center;padding:10px;overflow-x:auto}
+#preview canvas{background:#fff;border:1px dashed #999;max-width:100%;height:auto;image-rendering:pixelated}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin-bottom:10px}
+.fg label{display:flex;flex-direction:column;font-size:13px;color:var(--mut);gap:3px}.fg input{width:100%}
+#sheet{display:none}
+details summary{cursor:pointer}details ol{margin:8px 0 0 18px;padding:0;font-size:14px;color:var(--mut)}
+footer{font-size:12px;color:var(--mut);text-align:center;margin:8px 0 24px}
+@media print{
+ html,body{margin:0!important;padding:0!important;background:#fff}
+ :root{padding:0!important}
+ main{display:none}
+ .pg{overflow:hidden;break-after:page;page-break-after:always}
+ .pg:last-child{break-after:auto;page-break-after:auto}
+ .pg img{display:block;width:100%;height:100%;object-fit:contain;image-rendering:pixelated}
+}
+</style>
+</head>
+<body>
+<main>
+<h1>Дубль кода маркировки и штрихкода на этикетку</h1>
+<div class="card" style="border-color:var(--wr)"><b>Важно.</b> Один код маркировки — одна единица товара. Дубль нужен, чтобы заменить испорченную или нечитаемую этикетку либо продублировать код на упаковке. Не используйте один и тот же код для разных единиц товара.</div>
+<details class="card"><summary><b>Как пользоваться</b></summary>
+<ol>
+<li>Считайте код: камерой, фото или сканером (поставьте курсор в поле и сканируйте).</li>
+<li>Проверьте строку рядом с полем: должно быть «структура ЧЗ в порядке».</li>
+<li>Заполните название, бренд, размер и штрихкод товара (если нужно).</li>
+<li>Выберите размер этикетки по вашему рулону.</li>
+<li>Под предпросмотром должна быть зелёная строка «читается и совпадает с исходным».</li>
+<li>Печать: в диалоге выберите термопринтер, бумагу того же размера, поля «нет», масштаб 100%.</li>
+<li>Перед печатью тиража проверьте одну этикетку сканером или приложением.</li>
+</ol></details>
+
+<div class="card">
+ <h2>1. Считать код</h2>
+ <div class="row">
+  <button id="bCam">📷 Камера</button>
+  <button class="g" id="bStop" style="display:none">Стоп</button>
+  <label class="g" style="border:1px solid var(--bd);border-radius:10px;padding:10px 14px;cursor:pointer">🖼 Фото кода<input id="file" type="file" accept="image/*" hidden></label>
+ </div>
+ <video id="vid" playsinline muted></video>
+ <div class="msg" id="scanMsg">Подойдёт и камера, и USB/Bluetooth-сканер: поставьте курсор в поле ниже и сканируйте.</div>
+ <div style="margin-top:10px">
+  <textarea id="raw" placeholder="Значение кода. Можно вставить вручную или отсканировать сканером." spellcheck="false"></textarea>
+  <div class="row" style="margin-top:6px"><label>Считывать в: <select id="tgt"><option value="main">Код ЧЗ / основной</option><option value="ean">Штрихкод товара</option></select></label><button id="bUse">Использовать</button><span class="msg" id="info" style="margin:0"></span></div>
+ </div>
+ <div class="hist" id="hist"></div>
+</div>
+
+<div class="card">
+ <h2>2. Этикетка</h2>
+ <div class="fg">
+  <label>Название товара<input id="fName" placeholder="Футболка хлопковая"></label>
+  <label>Бренд<input id="fBrand"></label>
+  <label>Размер<input id="fSize" placeholder="M / 46-48"></label>
+  <label>Штрихкод товара (EAN)<input id="fEan" inputmode="numeric" placeholder="из ЧЗ подставится сам"></label>
+ </div>
+ <div class="row">
+  <label>Размер этикетки
+   <select id="size">
+    <option value="58x40">58 × 40 мм</option>
+    <option value="58x30">58 × 30 мм</option>
+    <option value="40x30">40 × 30 мм</option>
+    <option value="30x20">30 × 20 мм</option>
+    <option value="75x120">75 × 120 мм</option>
+    <option value="custom">Свой…</option>
+   </select></label>
+  <span id="cust" style="display:none" class="row"><input id="cw" type="number" value="58" min="10" max="210" style="width:70px"> ×<input id="ch" type="number" value="40" min="10" max="297" style="width:70px"> мм</span>
+  <label>Тип
+   <select id="fmt">
+    <option value="auto">Авто</option>
+    <option value="datamatrix">DataMatrix (ЧЗ)</option>
+    <option value="ean13">EAN-13</option>
+    <option value="ean8">EAN-8</option>
+    <option value="code128">Code 128</option>
+    <option value="qrcode">QR</option>
+   </select></label>
+  <label>Копий (до 10) <input id="qty" type="number" min="1" max="10" value="1" style="width:80px"></label>
+ </div>
+ <div class="row" style="margin-top:8px"><label><input type="checkbox" id="txt" checked> Подпись под кодом</label></div>
+ <div id="preview"></div>
+ <div class="row"><button id="bPrint">🖨 Печать</button><button class="g" id="bPng">Скачать PNG</button></div>
+ <div class="msg" id="warn"></div>
+ <div class="msg" id="chk"></div>
+</div>
+<footer>Версия 1.0 · лицензия на личное использование · сервис не связан с оператором системы маркировки</footer>
+</main>
+<div id="sheet"></div>
+<style id="pageStyle"></style>
+
+<script src="lib/bwip-js-min.js"></script>
+<script>window.bwipjs||document.write('<script src="https://cdn.jsdelivr.net/npm/bwip-js@4.5.1/dist/bwip-js-min.js"><\/script>')</script>
+<script src="lib/zxing-index.min.js"></script>
+<script>window.ZXing||document.write('<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.21.3/umd/index.min.js"><\/script>')</script>
+<script>
+const $=id=>document.getElementById(id);
+const GS=String.fromCharCode(29),K=12; // K = пикселей на мм при рендере этикетки
+let items=[],cur=null,stream=null,zx=null,raf=0,last='',lastT=0;
+try{items=JSON.parse(localStorage.getItem('lbl_items')||'[]')}catch(e){}
+
+function clean(s){
+  s=s.replace(/^\]d2|^\]C1|^\]E0|^\]Q1/,'').replace(/␝|<GS>|\\x1d|\\u001d/gi,GS).replace(/[\r\n]+$/,'');
+  if(/^\s*\(01\)/.test(s)){ // запись со скобками (01)…(21)…(91)…(92)… → настоящий код с GS, без скобок
+    const a=[...s.matchAll(/\((\d{2,4})\)([^(]*)/g)],fx={'00':1,'01':1,'02':1,'11':1,'12':1,'13':1,'15':1,'16':1,'17':1};
+    s=a.map((m,i)=>m[1]+m[2].replace(/\s+/g,'')+((fx[m[1]]||i===a.length-1)?'':GS)).join('');
+  }
+  if(/^01\d{14}21/.test(s))s=s.replace(/[ \t\r\n]+/g,'');
+  return s;
+}
+// Если сканер "съел" разделители GS, восстанавливаем структуру ЧЗ: 01..21<серийный>GS91<ключ>GS92<подпись>
+function fixKM(raw){
+  if(raw.includes(GS)||!/^01\d{14}21/.test(raw))return raw;
+  for(const n of[44,88]){
+    const t=raw.slice(-(n+8));
+    if(raw.length>18+n+8&&t.startsWith('91')&&t.slice(6,8)==='92')
+      return raw.slice(0,-(n+8))+GS+t.slice(0,6)+GS+t.slice(6);
+  }
+  return raw;
+}
+function detect(s,hint){
+  if(hint==='data_matrix')return 'datamatrix';
+  if(hint==='qr_code')return 'qrcode';
+  if(hint==='ean_13')return 'ean13';
+  if(hint==='ean_8')return 'ean8';
+  if(/^\d{13}$/.test(s))return 'ean13';
+  if(/^\d{8}$/.test(s))return 'ean8';
+  if(/^01\d{14}21/.test(s)||s.includes(GS)||s.length>40)return 'datamatrix';
+  return 'code128';
+}
+function shortCode(raw){
+  const p=raw.split(GS)[0],m=p.match(/^01(\d{14})21(.+)$/);
+  return m?['01'+m[1],'21'+m[2]]:[p.slice(0,30)];
+}
+function sizeMM(){
+  if($('size').value==='custom')return[+$('cw').value||58,+$('ch').value||40];
+  return $('size').value.split('x').map(Number);
+}
+const FIELDS=['fName','fBrand','fSize','fEan'];
+function saveF(){try{localStorage.setItem('lbl_f',JSON.stringify(FIELDS.map(i=>$(i).value)))}catch(e){}}
+function loadF(){try{const a=JSON.parse(localStorage.getItem('lbl_f')||'[]');FIELDS.forEach((i,k)=>$(i).value=a[k]||'')}catch(e){}}
+function getF(){return{name:$('fName').value.trim(),brand:$('fBrand').value.trim(),size:$('fSize').value.trim(),ean:$('fEan').value.replace(/\s/g,'')}}
+function textLines(f){
+  const l=[];if(f.name)l.push({t:f.name,b:1});
+  const s=[f.brand&&('Бренд: '+f.brand),f.size&&('Размер: '+f.size)].filter(Boolean).join('  ');
+  if(s)l.push({t:s,b:0});return l;
+}
+
+// ---- Отрисовка кодов (целое число пикселей на модуль — чёткие края) ----
+function draw(c,it,fmtSel,sc){
+  const fmt=fmtSel==='auto'?it.fmt:fmtSel;
+  const o={bcid:fmt,scale:sc,paddingwidth:0,paddingheight:0,text:it.raw};
+  if(fmt==='datamatrix'){ // ЧЗ: FNC1 в начале, дальше обычные символы GS (ASCII 29)
+    o.text=it.raw.includes('^')?it.raw:'^FNC1'+it.raw;
+    o.parsefnc=true;
+  }else if(fmt==='code128'||fmt==='ean13'||fmt==='ean8')o.height=14;
+  bwipjs.toCanvas(c,o);
+}
+function drawEan(c,e,sc){
+  const b=/^\d{13}$/.test(e)?'ean13':/^\d{8}$/.test(e)?'ean8':/^\d{12}$/.test(e)?'upca':'code128';
+  const o={scale:sc,height:13,includetext:true,textxalign:'center',textsize:10,text:e};
+  try{bwipjs.toCanvas(c,{...o,bcid:b})}catch(x){bwipjs.toCanvas(c,{...o,bcid:'code128'})}
+}
+function sized(fn,bw,bh){
+  const t=document.createElement('canvas');fn(t,1);
+  const s=Math.max(1,Math.floor(Math.min(bw/t.width,bh/t.height)));
+  const c=document.createElement('canvas');fn(c,s);return c;
+}
+
+// ---- Раскладка (мм): слева ЧЗ + код под ним, справа текст, справа внизу ШК товара ----
+function lay(it,w,h){
+  const f=getF(),P=1.5,G=2,ls=textLines(f);
+  const fm=it?($('fmt').value==='auto'?it.fmt:$('fmt').value):'';
+  const cap=it&&$('txt').checked?(fm==='datamatrix'?shortCode(it.raw):[it.raw.split(GS).join('').slice(0,30)]).filter(Boolean):[];
+  const L=Math.max(8,...cap.map(s=>s.length));
+  const dm=it?Math.min(w*0.36,(h-2*P)/(1+cap.length*1.935/L)):0;
+  const lx=it?1.5:0,dy=it?Math.max(0,(h-2*P-dm*(1+cap.length*1.935/L))/2):0;
+  const rw=w-2*P-(it?dm+G+lx:0);
+  const eanH=f.ean?Math.min(rw/2.3,(h-2*P)*0.5):0;
+  return{f,P,G,lx,dy,ls,cap,eanH,rw,dm,fsc:Math.min(dm/(0.62*L),2.8),tf:Math.max(1.8,Math.min(3.2,h*0.06))};
+}
+function compose(it,w,h){
+  const g=lay(it,w,h),m=v=>Math.round(v*K),P=g.P;
+  const c=document.createElement('canvas');c.width=m(w);c.height=m(h);
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.fillStyle='#000';x.textBaseline='top';x.imageSmoothingEnabled=false;
+  const MONO='ui-monospace,Menlo,Consolas,monospace';
+  let bT=m(P),bB=m(h-P); // верх и низ левого блока (ЧЗ + подпись): правая часть выравнивается по нему
+  if(it){
+    const fm=$('fmt').value==='auto'?it.fmt:$('fmt').value,dmx=fm==='datamatrix',q=dmx?2:0; // q = тихая зона в модулях
+    const t0=document.createElement('canvas');draw(t0,it,$('fmt').value,1);
+    const s=Math.max(1,Math.floor(Math.min(m(g.dm)/(t0.width+2*q),m(g.dm)/(t0.height+2*q))));
+    const a=document.createElement('canvas');draw(a,it,$('fmt').value,s);
+    const ox=m(P+g.lx)+q*s,oy=m(P+g.dy)+q*s;
+    x.drawImage(a,ox,oy);
+    if(dmx)c.dm={x:m(P+g.lx),y:m(P+g.dy),w:a.width+2*q*s,h:a.height+2*q*s};
+    let cf=m(g.fsc);x.font=cf+'px '+MONO;
+    const mw=Math.max(0,...g.cap.map(t=>x.measureText(t).width));
+    if(mw>a.width){cf*=a.width/mw;x.font=cf+'px '+MONO}
+    x.textAlign='center';
+    g.cap.forEach((t,i)=>x.fillText(t,ox+a.width/2,oy+a.height+Math.max(q*s,m(0.4))+i*cf*1.2));
+    bT=oy;bB=Math.round(oy+a.height+Math.max(q*s,m(0.4))+g.cap.length*cf*1.1);
+  }
+  const tx=m(P+(it?g.dm+g.G+g.lx:0)),tw=m(g.rw),fs=m(g.tf),yMax=bB-(g.eanH?m(g.eanH)+m(1):0);let y=bT;
+  x.textAlign='left';
+  g.ls.forEach(o=>{
+    x.font=(o.b?'bold ':'')+fs+'px system-ui,sans-serif';let ln='';
+    const flush=()=>{if(ln&&y+fs<=yMax+2){x.fillText(ln,tx,y);y+=fs*1.15}ln=''};
+    o.t.split(/\s+/).forEach(wd=>{const t=ln?ln+' '+wd:wd;if(x.measureText(t).width>tw&&ln){flush();ln=wd}else ln=t});
+    flush();
+  });
+  if(g.f.ean){
+    const a=sized((cv,s)=>drawEan(cv,g.f.ean,s),tw,m(g.eanH));
+    x.drawImage(a,tx+Math.floor((tw-a.width)/2),bB-a.height);
+  }
+  return c;
+}
+
+// Проверка: читаем рассчитанный DataMatrix обратно и сравниваем с исходным кодом
+function verify(c){
+  const el=$('chk');el.innerHTML='';
+  if(!cur||!c.dm||!(window.ZXing&&ZXing.HTMLCanvasElementLuminanceSource))return;
+  const r=c.dm,v=document.createElement('canvas');v.width=r.w;v.height=r.h;
+  v.getContext('2d').drawImage(c,r.x,r.y,r.w,r.h,0,0,r.w,r.h);
+  try{
+    const rd=new ZXing.MultiFormatReader(),hm=new Map();
+    hm.set(ZXing.DecodeHintType.POSSIBLE_FORMATS,[ZXing.BarcodeFormat.DATA_MATRIX]);hm.set(ZXing.DecodeHintType.TRY_HARDER,true);rd.setHints(hm);
+    const res=rd.decode(new ZXing.BinaryBitmap(new ZXing.HybridBinarizer(new ZXing.HTMLCanvasElementLuminanceSource(v))));
+    const t=res.getText().replace(/^\x1d/,'');
+    el.innerHTML=t===cur.raw?'<span class="ok">✓ Проверка: квадратный код на этикетке читается и совпадает с исходным</span>'
+      :'<span class="wr">⚠ Проверка: код читается, но отличается от исходного. Прочитано: '+t.split(GS).join('␝').slice(0,60)+'…</span>';
+  }catch(e){el.innerHTML='<span class="wr">⚠ Проверка: чтение кода с этикетки не удалось — увеличьте размер этикетки или проверьте данные кода</span>'}
+}
+function render(){
+  const pv=$('preview');pv.innerHTML='';$('warn').textContent='';$('chk').innerHTML='';
+  $('cust').style.display=$('size').value==='custom'?'flex':'none';
+  $('hist').innerHTML='';
+  items.forEach(it=>{
+    const d=document.createElement('div');d.className='hi'+(it===cur?' on':'');
+    d.innerHTML='<span></span><span style="color:var(--mut)"></span>';
+    d.children[0].textContent=it.raw.split(GS).join('␝').slice(0,48);
+    d.children[1].textContent=it.fmt;
+    d.onclick=()=>{cur=it;$('raw').value=it.raw;info();render()};
+    $('hist').appendChild(d);
+  });
+  if(!cur&&!getF().ean){pv.innerHTML='<span class="msg">Отсканируйте код или введите штрихкод товара</span>';return}
+  const[w,h]=sizeMM();
+  try{
+    const c=compose(cur,w,h);c.style.width=w+'mm';pv.appendChild(c);verify(c);
+  }catch(e){pv.innerHTML='<span class="wr">Не удалось построить код: '+(e.message||e)+'</span>'}
+  if(cur&&cur.fmt==='datamatrix'&&!cur.raw.includes(GS))
+    $('warn').innerHTML='<span class="wr">⚠ В коде нет разделителя GS, и восстановить структуру ЧЗ не удалось. Такой код «Честный знак» может не принять. Отсканируйте код заново камерой здесь или включите в сканере передачу GS (ASCII 29).</span>';
+}
+function kmCheck(raw){
+  const p=raw.split(GS);
+  if(!/^01\d{14}21.+$/.test(p[0]))return'не найден блок 01…21… (GTIN и серийный номер)';
+  if(!/^91.{4}$/.test(p[1]||''))return'нет ключа проверки (91…), код неполный';
+  if(!/^92(.{44}|.{88})$/.test(p[2]||''))return'нет подписи (92…) или она неполная';
+  return'';
+}
+function info(){
+  if(!cur)return;
+  let s='Тип: '+cur.fmt+' · '+cur.raw.length+' симв.';
+  if(cur.fixed)s+=' · разделители GS восстановлены';
+  const bad=cur.fmt==='datamatrix'?kmCheck(cur.raw):'';
+  $('info').innerHTML=bad?'<span class="wr">⚠ ЧЗ: '+bad+'</span>':'<span class="ok">'+s+(cur.fmt==='datamatrix'?' · структура ЧЗ в порядке':'')+'</span>';
+}
+function accept(raw,hint){
+  raw=clean(raw);if(!raw)return;
+  if($('tgt').value==='ean'){$('fEan').value=raw.replace(/\s/g,'');saveF();render();$('info').innerHTML='<span class="ok">Штрихкод товара: '+$('fEan').value+'</span>';return}
+  const fx=fixKM(raw),it={raw:fx,fmt:detect(fx,hint),fixed:fx!==raw};
+  if(it.fmt==='datamatrix'&&!$('fEan').value){const m=fx.match(/^01(\d{14})21/);if(m&&m[1][0]==='0'){$('fEan').value=m[1].slice(1);saveF()}}
+  items=items.filter(x=>x.raw!==fx);items.unshift(it);items=items.slice(0,15);
+  try{localStorage.setItem('lbl_items',JSON.stringify(items))}catch(e){}
+  cur=it;$('raw').value=fx;info();render();
+}
+$('bUse').onclick=()=>accept($('raw').value);
+$('raw').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();accept($('raw').value)}});
+['size','cw','ch','fmt','txt'].forEach(id=>$(id).addEventListener('change',render));
+
+// ---- Камера ----
+async function startCam(){
+  try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment',width:{ideal:1280}}})}
+  catch(e){$('scanMsg').innerHTML='<span class="wr">Нет доступа к камере. Разрешите её в браузере или загрузите фото кода.</span>';return}
+  const v=$('vid');v.srcObject=stream;v.style.display='block';await v.play();
+  $('bStop').style.display='';$('bCam').style.display='none';$('scanMsg').textContent='Наведите на код…';
+  if('BarcodeDetector' in window){
+    const det=new BarcodeDetector();
+    const loop=async()=>{
+      if(!stream)return;
+      try{const r=await det.detect(v);if(r.length)hit(r[0].rawValue,r[0].format)}catch(e){}
+      raf=requestAnimationFrame(()=>setTimeout(loop,120));
+    };loop();
+  }else{
+    zx=new ZXing.BrowserMultiFormatReader();
+    zx.decodeFromVideoElement(v,res=>{if(res)hit(res.getText(),({5:'data_matrix',11:'qr_code',6:'ean_13',7:'ean_8'})[res.getBarcodeFormat()]||'')});
+  }
+}
+function hit(val,fmt){
+  const t=Date.now();if(val===last&&t-lastT<2500)return;last=val;lastT=t;
+  accept(val,fmt);if(navigator.vibrate)navigator.vibrate(60);
+  $('scanMsg').innerHTML='<span class="ok">Считано ✓</span> можно сканировать следующий';
+}
+function stopCam(){
+  cancelAnimationFrame(raf);if(zx){try{zx.reset()}catch(e){}zx=null}
+  if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}
+  $('vid').style.display='none';$('bStop').style.display='none';$('bCam').style.display='';
+}
+$('bCam').onclick=startCam;$('bStop').onclick=stopCam;
+$('file').onchange=async e=>{
+  const f=e.target.files[0];if(!f)return;
+  $('scanMsg').textContent='Ищу код на фото…';
+  try{
+    if('BarcodeDetector' in window){
+      const r=await new BarcodeDetector().detect(await createImageBitmap(f));
+      if(r.length){accept(r[0].rawValue,r[0].format);$('scanMsg').innerHTML='<span class="ok">Считано ✓</span>';return}
+    }
+    const res=await new ZXing.BrowserMultiFormatReader().decodeFromImageUrl(URL.createObjectURL(f));
+    accept(res.getText(),({5:'data_matrix',11:'qr_code',6:'ean_13',7:'ean_8'})[res.getBarcodeFormat()]||'');
+    $('scanMsg').innerHTML='<span class="ok">Считано ✓</span>';
+  }catch(err){$('scanMsg').innerHTML='<span class="wr">Код на фото не найден. Сделайте снимок ближе и ровнее.</span>'}
+  e.target.value='';
+};
+
+// ---- Печать: этикетка печатается как готовая картинка точного размера ----
+$('bPrint').onclick=async()=>{
+  if(!cur&&!getF().ean)return;
+  const[w,h]=sizeMM(),n=Math.max(1,Math.min(10,+$('qty').value||1));
+  let url;try{url=compose(cur,w,h).toDataURL('image/png')}catch(e){return}
+  $('pageStyle').textContent='@page{size:'+w+'mm '+h+'mm;margin:0}@media print{html,body{width:'+w+'mm}.pg{width:'+w+'mm;height:'+(h-0.3)+'mm}}';
+  const s=$('sheet');s.innerHTML='';const ims=[];
+  for(let i=0;i<n;i++){const d=document.createElement('div');d.className='pg';const im=new Image();im.src=url;d.appendChild(im);s.appendChild(d);ims.push(im)}
+  s.style.display='block';
+  await Promise.all(ims.map(i=>i.decode().catch(()=>{})));
+  setTimeout(()=>{window.print();s.style.display=''},50);
+};
+$('bPng').onclick=()=>{
+  if(!cur&&!getF().ean)return;
+  const[w,h]=sizeMM();let c;try{c=compose(cur,w,h)}catch(e){return}
+  const a=document.createElement('a');a.download='label.png';a.href=c.toDataURL('image/png');a.click();
+};
+items.forEach(it=>{it.raw=fixKM(clean(it.raw));it.fmt=detect(it.raw,'')});
+loadF();FIELDS.forEach(i=>$(i).addEventListener('input',()=>{saveF();render()}));
+if(items.length){cur=items[0];$('raw').value=cur.raw;info()}
+render();
+</script>
+</body>
+</html>
