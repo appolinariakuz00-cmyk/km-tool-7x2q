@@ -63,7 +63,6 @@ footer{font-size:12px;color:var(--mut);text-align:center;margin:8px 0 24px}
  <div class="row">
   <button id="bCam">📷 Камера</button>
   <button class="g" id="bStop" style="display:none">Стоп</button>
-  <label class="g" style="border:1px solid var(--bd);border-radius:10px;padding:10px 14px;cursor:pointer;background:var(--ac);color:#fff">📸 Сфотографировать код<input id="shot" type="file" accept="image/*" capture="environment" hidden></label>
   <label class="g" style="border:1px solid var(--bd);border-radius:10px;padding:10px 14px;cursor:pointer">🖼 Из галереи<input id="file" type="file" accept="image/*" hidden></label>
  </div>
  <div id="vwrap" style="position:relative;overflow:hidden;border-radius:10px"><video id="vid" playsinline muted></video><div id="aim" style="display:none;position:absolute;inset:0;margin:auto;width:62%;aspect-ratio:1;max-height:78%;border:3px solid rgba(255,255,255,.9);border-radius:12px;pointer-events:none;box-shadow:0 0 0 999px rgba(0,0,0,.28)"></div></div>
@@ -307,7 +306,7 @@ $('raw').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();a
 // ---- Камера ----
 async function startCam(){
   try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}})}
-  catch(e){$('scanMsg').innerHTML='<span class="wr">Камера здесь недоступна (так бывает во встроенных браузерах приложений и у файла на телефоне). Откройте страницу в Chrome или Safari по https-ссылке либо нажмите «Сфотографировать код».</span>';return}
+  catch(e){$('scanMsg').innerHTML='<span class="wr">Камера здесь недоступна (так бывает во встроенных браузерах приложений и у файла на телефоне). Откройте страницу в Chrome или Safari по https-ссылке либо загрузите фото кода кнопкой «Из галереи».</span>';return}
   const v=$('vid');v.srcObject=stream;v.style.display='block';await v.play();$('aim').style.display='block';
   try{const tr=stream.getVideoTracks()[0],cp=tr.getCapabilities&&tr.getCapabilities();if(cp&&cp.focusMode&&cp.focusMode.includes('continuous'))await tr.applyConstraints({advanced:[{focusMode:'continuous'}]})}catch(e){}
   $('bStop').style.display='';$('bCam').style.display='none';$('scanMsg').textContent='Наведите на код…';
@@ -368,7 +367,7 @@ async function readPhoto(f){
     msg.innerHTML='<span class="ok">Считано ✓</span>';
   }catch(err){msg.innerHTML='<span class="wr">Код на фото не найден. Снимите ближе: квадрат должен занимать большую часть кадра, без бликов и наклона.</span>'}
 }
-$('file').onchange=$('shot').onchange=async e=>{const f=e.target.files[0];if(f)await readPhoto(f);e.target.value=''};
+$('file').onchange=async e=>{const f=e.target.files[0];if(f)await readPhoto(f);e.target.value=''};
 
 // ---- Печать: этикетка печатается как готовая картинка точного размера ----
 $('bPrint').onclick=async()=>{
